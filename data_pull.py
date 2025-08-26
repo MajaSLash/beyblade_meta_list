@@ -23,6 +23,9 @@ for report in reports:
         title = title.replace("-", " ")
         ending_char = title.find("&action")
         title = title[:ending_char]
+        if title.find("?action"):
+            question_char = title.find("?action")
+            title = title[:question_char]
         href = "https://worldbeyblade.org/" + href
 
 
@@ -40,20 +43,19 @@ for report in reports:
 print("Final Links:")
 for tournament in tournament_list:
     try:
-        with open(f"{tournament[0]}.txt", "x") as f:
-            f.write(f"Report for {tournament[0]}: {tournament[1]}")
+        with open(f"reports/{tournament[0]}.txt", "a") as f:
+            f.write(f"Report for {tournament[0]}: {tournament[1]}\n")
+            response = requests.get(tournament[1])
+            soup = BeautifulSoup(response.content, "html.parser")
+
+            print("Status Code:", response.status_code)
+
+            content_div = soup.find('div', class_='post_body')
+            if content_div:
+                for para in content_div.find_all('span'):
+                    f.write(para.text.strip() + "\n")
+    
     except FileExistsError:
         print("Already exists.")
-
-    response = requests.get(tournament[1])
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    print("Status Code:", response.status_code)
-
-    content_div = soup.find('div', class_='post_body')
-    if content_div:
-         for para in content_div.find_all('span'):
-             with open(f"{tournament[0]}.txt", "a") as f:
-                 f.write(para.text.strip() + "\n")
 
 
